@@ -22,23 +22,53 @@ How many passwords are valid according to their policies?
 from __future__ import annotations
 from pprint import PrettyPrinter
 from helper import *
+import re
+from collections import Counter
+from operator import xor
 
 p = PrettyPrinter()
 
-def part1(data):
-    pass
+
+def parse_restriction(restriction: str) -> tuple[int, int, str]:
+    matches = re.match(r"(\d+)-(\d+) (\w)", restriction)
+    start, end, letter = matches.groups()
+    return int(start), int(end), letter
 
 
+def part1(data: list[str]) -> int:
+    valid_passwords = 0
+    for entry in data:
+        restriction, password = [item.strip() for item in entry.split(":")]
+        mininum, maximum, letter = parse_restriction(restriction)
+        letter_count = Counter(password)
+        if mininum <= letter_count.get(letter, -1) <= maximum:
+            valid_passwords += 1
+    return valid_passwords
 
 
-def part2(data):
-    pass
+def part2(data: list[str]) -> int:
+    valid_passwords = 0
+    for entry in data:
+        restriction, password = [item.strip() for item in entry.split(":")]
+        first, second, letter = parse_restriction(restriction)
+        if len(password) <= first or len(password) <= second:
+            continue
+        occurences = set(
+            [idx + 1 for idx, char in enumerate(password) if char == letter]
+        )
+        first_in_set = first in occurences
+        second_in_set = second in occurences
+        if xor(first_in_set, second_in_set):
+            valid_passwords += 1
+    return valid_passwords
 
-if __name__ == '__main__':
-    data = read_as_int_list('/home/dimitrios/dev/adventofcode2020/adventofcode2020/day02_input.txt')
+
+if __name__ == "__main__":
+    data = read_as_string_list(
+        "/home/dimitrios/dev/adventofcode2020/adventofcode2020/day02_input.txt"
+    )
     result1 = part1(data)
     p.pprint(result1)
-
 
     result2 = part2(data)
     p.pprint(result2)
