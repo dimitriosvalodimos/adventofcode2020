@@ -52,25 +52,59 @@ In this example, traversing the map using this slope would cause you to encounte
 Starting at the top-left corner of your map and following a slope of right 3 and down 1, how many trees would you encounter?
 """
 from __future__ import annotations
+from functools import reduce
 from pprint import PrettyPrinter
 from helper import *
 
 p = PrettyPrinter()
 
-def part1(data):
-    pass
+
+class dotdict(dict):
+    __getattr__ = dict.get
+    __setattr__ = dict.__setattr__
+    __delattr__ = dict.__delattr__
 
 
+def part1(data: list[str]) -> int:
+    encountered_trees = 0
+    pos_dict = {"x": 0, "y": 0}
+    pos = dotdict(pos_dict)
+    map_height = len(data)
+    map_width = len(data[0])
+    while pos.y < map_height:
+        if data[pos.y][pos.x] == "#":
+            encountered_trees += 1
+        pos.x = (pos.x + 3) % map_width
+        pos.y = pos.y + 1
+
+    return encountered_trees
 
 
-def part2(data):
-    pass
+def part2(data: list[str]) -> int:
+    encountered_trees_per_slope = []
+    map_height = len(data)
+    map_width = len(data[0])
+    slopes = [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
+    for slope in slopes:
+        encountered_trees = 0
+        pos_dict = {"x": 0, "y": 0}
+        pos = dotdict(pos_dict)
+        while pos.y < map_height:
+            if data[pos.y][pos.x] == "#":
+                encountered_trees += 1
+            pos.x = (pos.x + slope[0]) % map_width
+            pos.y = pos.y + slope[1]
+        encountered_trees_per_slope.append(encountered_trees)
 
-if __name__ == '__main__':
-    data = read_as_int_list('/home/dimitrios/dev/adventofcode2020/adventofcode2020/day03_input.txt')
+    return reduce(lambda x, y: x * y, encountered_trees_per_slope)
+
+
+if __name__ == "__main__":
+    data = read_as_string_list(
+        "/home/dimitrios/dev/adventofcode2020/adventofcode2020/day03_input.txt"
+    )
     result1 = part1(data)
     p.pprint(result1)
-
 
     result2 = part2(data)
     p.pprint(result2)
