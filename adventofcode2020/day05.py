@@ -45,6 +45,11 @@ p = PrettyPrinter()
 
 
 def part1(data: list[str]) -> int:
+    """
+    using the example of "FBFBBFFRLR" I just tried using binary encoding
+    because 128 rows and 8 columns lend themselves to be encoded using binary
+    (both being powers of 2)
+    """
     highest = 0
     for entry in data:
         row, col = entry[:-3], entry[-3:]
@@ -56,7 +61,7 @@ def part1(data: list[str]) -> int:
     return highest
 
 
-def part2(data):
+def part2(data: list[str]) -> int:
     pass
 
 
