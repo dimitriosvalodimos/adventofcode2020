@@ -44,8 +44,16 @@ from helper import *
 p = PrettyPrinter()
 
 
-def part1(data):
-    pass
+def part1(data: list[str]) -> int:
+    highest = 0
+    for entry in data:
+        row, col = entry[:-3], entry[-3:]
+        row_val = int(row.replace("F", "0").replace("B", "1"), 2)
+        col_val = int(col.replace("R", "1").replace("L", "0"), 2)
+        seat_id = row_val * 8 + col_val
+        if seat_id > highest:
+            highest = seat_id
+    return highest
 
 
 def part2(data):
