@@ -31,26 +31,33 @@ from helper import *
 p = PrettyPrinter()
 
 
-def part1(data: list[int]) -> int:
+def part1(data: list[int], target: int) -> int:
     # nearly O(1) lookup
     set_repr = set(data)
 
     for number in data:
-        difference = 2020 - number
+        difference = target - number
         if difference in set_repr:
             return difference * number
     return 0
 
 
-def part2(data):
-    pass
+def part2(data: list[int]) -> int:
+    for number in data:
+        difference = 2020 - number
+        sub_result = part1(data, difference)
+        if sub_result == 0:
+            continue
+        else:
+            return number * sub_result
+    return 0
 
 
 if __name__ == "__main__":
     data = read_as_int_list(
         "/home/dimitrios/dev/adventofcode2020/adventofcode2020/day01_input.txt"
     )
-    result1 = part1(data)
+    result1 = part1(data, 2020)
     p.pprint(result1)
 
     result2 = part2(data)
