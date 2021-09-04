@@ -40,6 +40,7 @@ As a sanity check, look through your list of boarding passes. What is the highes
 from __future__ import annotations
 from pprint import PrettyPrinter
 from helper import *
+from collections import deque
 
 p = PrettyPrinter()
 
@@ -62,7 +63,16 @@ def part1(data: list[str]) -> int:
 
 
 def part2(data: list[str]) -> int:
-    pass
+    all_seats = []
+    for entry in data:
+        row, col = entry[:-3], entry[-3:]
+        row_val = int(row.replace("F", "0").replace("B", "1"), 2)
+        col_val = int(col.replace("R", "1").replace("L", "0"), 2)
+        seat_id = row_val * 8 + col_val
+        all_seats.append(seat_id)
+    all_numbers = set(range(min(all_seats), max(all_seats) + 1))
+    seat_set = set(all_seats)
+    return (all_numbers - seat_set).pop()
 
 
 if __name__ == "__main__":
