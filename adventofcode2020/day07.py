@@ -36,46 +36,42 @@ from helper import *
 p = PrettyPrinter()
 
 
-class Bag:
-    def __init__(self, value: str) -> None:
-        self.value = value
-        self.children = set()
-
-    def add_children(self, children: list[str]) -> None:
-        for child in children:
-            b = Bag(child)
-            self.children.add(b)
-
-    def __repr__(self) -> str:
-        return p.pformat((self.value, self.children))
-
-
-def remove_bag_word(item: str) -> str:
+def singularize(item: str) -> str:
+    item_split = item.split(" ")
+    if item_split[0].isdigit():
+        del item_split[0]
+    item = " ".join(item_split)
     return (
-        item.replace("bags", "")
-        .replace("bags.", "")
-        .replace("bag.", "")
-        .replace("bag", "")
+        item.replace("bags", "bag")
+        .replace("bags.", "bag")
+        .replace("bag.", "bag")
         .strip()
     )
 
 
-BAGS = {}
+def clean_up_data(data: list[str]) -> dict[str, list[str]]:
+    new_data = {}
+    for entry in data:
+        first, rest = [i.strip() for i in entry.split("contain")]
+        first = singularize(first)
+        rest = [singularize(i.strip()) for i in rest.split(",")]
+        new_data[first] = rest
+    return new_data
+
+
+def traverse(bag_set: set[str], bags: dict[str, list[str]], child: str) -> set[str]:
+    for parent in bags:
+        children = bags[parent]
+        if child in children:
+            _ = traverse(bag_set, bags, parent)
+            bag_set.add(parent)
+    return bag_set
 
 
 def part1(data: list[str]) -> int:
-    global BAGS
-    for row in data:
-        first_bag, rest = split_no_whitespace(row, "contain")
-        first_bag = remove_bag_word(first_bag)
-        inside_bags = []
-        if "," in rest:
-            inside_bags.extend(sanitized_split(rest, ","))
-            inside_bags = [remove_bag_word(i) for i in inside_bags]
-        BAGS[first_bag] = inside_bags
-    tree = create_tree()
-    p.pprint(tree)
-    return 0
+    cleaned = clean_up_data(data)
+    final_set = traverse(set(), cleaned, "shiny gold bag")
+    return len(final_set)
 
 
 def part2(data):
