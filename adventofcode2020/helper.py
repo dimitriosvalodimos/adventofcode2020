@@ -1,5 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
+import re
+from string import punctuation
 
 
 def validate_path(path: str) -> Path:
@@ -37,3 +39,25 @@ def read_as_string_list_blanklines(path: str) -> list[list[str]]:
                 data.append(tmp)
                 tmp = []
     return data
+
+
+def remove_numbers(item: str) -> str:
+    item = item.strip()
+    regex = re.compile(r"\d+")
+    return regex.sub("", item)
+
+
+def sanitize_string(item: str) -> str:
+    item = item.strip()
+    regex = re.compile("[%s]" % re.escape(punctuation))
+    return regex.sub("", item)
+
+
+def sanitized_split(item: str, by: str) -> list[str]:
+    split_items = [sanitize_string(remove_numbers(i)) for i in item.split(by)]
+    return split_items
+
+
+def split_no_whitespace(item: str, by: str) -> list[str]:
+    split_items = [i.strip() for i in item.split(by)]
+    return split_items

@@ -35,20 +35,59 @@ from helper import *
 
 p = PrettyPrinter()
 
-def part1(data):
-    pass
+
+class Bag:
+    def __init__(self, value: str) -> None:
+        self.value = value
+        self.children = set()
+
+    def add_children(self, children: list[str]) -> None:
+        for child in children:
+            b = Bag(child)
+            self.children.add(b)
+
+    def __repr__(self) -> str:
+        return p.pformat((self.value, self.children))
 
 
+def remove_bag_word(item: str) -> str:
+    return (
+        item.replace("bags", "")
+        .replace("bags.", "")
+        .replace("bag.", "")
+        .replace("bag", "")
+        .strip()
+    )
+
+
+BAGS = {}
+
+
+def part1(data: list[str]) -> int:
+    global BAGS
+    for row in data:
+        first_bag, rest = split_no_whitespace(row, "contain")
+        first_bag = remove_bag_word(first_bag)
+        inside_bags = []
+        if "," in rest:
+            inside_bags.extend(sanitized_split(rest, ","))
+            inside_bags = [remove_bag_word(i) for i in inside_bags]
+        BAGS[first_bag] = inside_bags
+    tree = create_tree()
+    p.pprint(tree)
+    return 0
 
 
 def part2(data):
     pass
 
-if __name__ == '__main__':
-    data = read_as_int_list('/home/dimitrios/dev/adventofcode2020/adventofcode2020/day07_input.txt')
+
+if __name__ == "__main__":
+    data = read_as_string_list(
+        "/home/dimitrios/dev/adventofcode2020/adventofcode2020/day07_input.txt"
+    )
     result1 = part1(data)
     p.pprint(result1)
-
 
     result2 = part2(data)
     p.pprint(result2)
