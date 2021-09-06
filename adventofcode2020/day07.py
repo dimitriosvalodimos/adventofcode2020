@@ -49,6 +49,15 @@ def singularize(item: str) -> str:
     )
 
 
+def singularize_leave_digits(item: str) -> str:
+    return (
+        item.replace("bags", "bag")
+        .replace("bags.", "bag")
+        .replace("bag.", "bag")
+        .strip()
+    )
+
+
 def clean_up_data(data: list[str]) -> dict[str, list[str]]:
     new_data = {}
     for entry in data:
@@ -74,8 +83,39 @@ def part1(data: list[str]) -> int:
     return len(final_set)
 
 
-def part2(data):
-    pass
+def get_count(item: str) -> tuple[int, str]:
+    item_split = item.split(" ")
+    if item_split[0].isdigit():
+        return int(item_split[0]), " ".join(item_split[1:])
+    else:
+        return 0, " ".join(item_split)
+
+
+def clean_up_data_leave_digits(data: list[str]) -> dict[str, list[tuple[int, str]]]:
+    new_data = {}
+    for entry in data:
+        first, rest = [i.strip() for i in entry.split("contain")]
+        first = singularize(first)
+        rest = [singularize_leave_digits(i.strip()) for i in rest.split(",")]
+        rest = [get_count(i) for i in rest]
+        new_data[first] = rest
+    return new_data
+
+
+def bag_cost(color: str, bags: dict[str, list[tuple[int, str]]]) -> int:
+    total = 0
+    for count, name in bags[color]:
+        if name == "no other bag":
+            return 0
+        total += count
+        total += count * bag_cost(name, bags)
+    return total
+
+
+def part2(data: list[str]) -> int:
+    cleaned = clean_up_data_leave_digits(data)
+    cost = bag_cost("shiny gold bag", cleaned)
+    return cost
 
 
 if __name__ == "__main__":
