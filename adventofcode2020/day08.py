@@ -42,21 +42,117 @@ Immediately before the program would run an instruction a second time, the value
 Run your copy of the boot code. Immediately before any instruction is executed a second time, what value is in the accumulator?
 """
 from __future__ import annotations
-from adventofcode2020.helper import read_as_string_list
+from enum import Enum, auto
 from pprint import PrettyPrinter
 from helper import *
 
 p = PrettyPrinter()
 
 
+class OPS(Enum):
+    NOP = auto()
+    ACC = auto()
+    JMP = auto()
+
+
+class VM:
+    def __init__(self, instructions: list[str]) -> None:
+        self.memory = self.generate_instruction_tape(instructions)
+        self.pc = 0
+        self.acc = 0
+
+    def generate_instruction_tape(self, instructions: list[str]) -> list[dict]:
+        encoded_tape = []
+        for row in instructions:
+            op, value = [i.strip() for i in row.split(" ")]
+            op = self.parse_op(op)
+            value = self.parse_value(value)
+            encoded_tape.append({"op": op, "value": value, "visited": False})
+        return encoded_tape
+
+    def parse_op(self, op: str) -> OPS:
+        if op == "nop":
+            return OPS.NOP
+        elif op == "acc":
+            return OPS.ACC
+        elif op == "jmp":
+            return OPS.JMP
+        else:
+            raise ValueError(f"Invalid OP: {op=}")
+
+    def parse_value(self, value: str) -> int:
+        sign, val = value[0], value[1:]
+        try:
+            v = int(val)
+            if sign == "+":
+                return v
+            else:
+                return v * -1
+        except:
+            raise ValueError(f"Invalid {value=}")
+
+    def simulate(self) -> int:
+        while True:
+            instruction = self.memory[self.pc]
+            op, value, visited = (
+                instruction["op"],
+                instruction["value"],
+                instruction["visited"],
+            )
+            p.pprint((op, value, visited))
+            if visited:
+                return self.acc
+            else:
+                if op == OPS.NOP:
+                    self.pc += 1
+                elif op == OPS.JMP:
+                    self.pc += value
+                elif op == OPS.ACC:
+                    self.acc += value
+                    self.pc += 1
+                instruction["visited"] = True
+
+    def simulate_part2(self) -> int | None:
+        while True:
+            if self.pc >= len(self.memory):
+                return None
+            instruction = self.memory[self.pc]
+            op, value, visited = (
+                instruction["op"],
+                instruction["value"],
+                instruction["visited"],
+            )
+            if self.pc == len(self.memory) - 1:
+                return self.acc
+            if visited:
+                return None
+            else:
+                if op == OPS.NOP:
+                    self.pc += 1
+                elif op == OPS.JMP:
+                    self.pc += value
+                elif op == OPS.ACC:
+                    self.acc += value
+                    self.pc += 1
+                instruction["visited"] = True
+
+
 def part1(data: list[str]) -> int:
-    for row in data:
-        op, value = [i.strip() for i in row.split(" ")]
-        p.pprint((op, value))
+    vm = VM(data)
+    final_value = vm.simulate()
+    return final_value
 
 
-def part2(data):
-    pass
+def part2(data: list[str]):
+    for i in range(len(data)):
+        if data[i].startswith("jmp"):
+            data[i] = data[i].replace("jmp", "nop")
+        elif data[i].startswith("nop"):
+            data[i] = data[i].replace("nop", "jmp")
+        vm = VM(data)
+        attempt = vm.simulate_part2()
+        if attempt != None:
+            return attempt
 
 
 if __name__ == "__main__":
