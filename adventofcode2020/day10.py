@@ -87,12 +87,39 @@ from helper import *
 p = PrettyPrinter()
 
 
-def part1(data):
-    pass
+# data is a list of output joltages
+# Any adapter can take 1,2 or 3 jolts less than its rating and still produce
+# the specified output joltage
+# device has a built-in joltage adaper for 3 jolts higher than highest rated adapter in list
+# use every adapter in bag at once
+# what is the distrib. of jultage diffs between charging outlet (0), adapters and device
 
 
-def part2(data):
-    pass
+def part1(data: list[int]) -> int:
+    distribution = {1: 0, 2: 0, 3: 0}
+    data = sorted(data)
+    target = data[-1] + 3
+    previous_joltage = 0
+    for entry in data:
+        diff = abs(entry - previous_joltage)
+        distribution[diff] += 1
+        previous_joltage = entry
+    distribution[abs(target - previous_joltage)] += 1
+    return distribution[1] * distribution[3]
+
+
+def part2(data: list[int]) -> int:
+    data = sorted(data)
+    data = data + [data[-1] + 3]
+    answer = {}
+    answer[0] = 1
+    for adapter in data:
+        answer[adapter] = (
+            answer.get(adapter - 1, 0)
+            + answer.get(adapter - 2, 0)
+            + answer.get(adapter - 3, 0)
+        )
+    return answer.get(max(data))
 
 
 if __name__ == "__main__":
