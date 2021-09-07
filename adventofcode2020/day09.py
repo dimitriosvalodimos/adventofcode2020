@@ -48,23 +48,44 @@ The first step of attacking the weakness in the XMAS data is to find the first n
 from __future__ import annotations
 from pprint import PrettyPrinter
 from helper import *
+from itertools import combinations
+from more_itertools import windowed
 
 p = PrettyPrinter()
 
-def part1(data):
-    pass
+
+def part1(data: list[int]) -> int:
+    for index, value in enumerate(data):
+        if index < 25:
+            pass
+        else:
+            first_25 = data[index - 25 : index]
+            all_pair_combinations = list(combinations(first_25, 2))
+            summed_pairs = set([a + b for a, b in all_pair_combinations])
+            if value not in summed_pairs:
+                return value
+    return 0
 
 
+def part2(data: list[int]) -> int:
+    target = part1(data)
+    target_window = []
+    for i in range(2, len(data)):
+        windowed_list = list(windowed(data, i))
+        summed = [sum(elements) for elements in windowed_list]
+        if target in summed:
+            idx = summed.index(target)
+            target_window = windowed_list[idx]
+    mini, maxi = min(target_window), max(target_window)
+    return mini + maxi
 
 
-def part2(data):
-    pass
-
-if __name__ == '__main__':
-    data = read_as_int_list('/home/dimitrios/dev/adventofcode2020/adventofcode2020/day09_input.txt')
+if __name__ == "__main__":
+    data = read_as_int_list(
+        "/home/dimitrios/dev/adventofcode2020/adventofcode2020/day09_input.txt"
+    )
     result1 = part1(data)
     p.pprint(result1)
-
 
     result2 = part2(data)
     p.pprint(result2)
