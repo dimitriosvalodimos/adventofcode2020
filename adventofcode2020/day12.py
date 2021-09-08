@@ -36,23 +36,55 @@ Figure out where the navigation instructions lead. What is the Manhattan distanc
 from __future__ import annotations
 from pprint import PrettyPrinter
 from helper import *
+import re
 
 p = PrettyPrinter()
 
+
+def parse_sequence(s: str) -> tuple[str, int]:
+    matches = re.match(r"(N|S|E|W|L|R|F){1}(\d+)", s)
+    d, a = matches.groups()
+    return d, int(a)
+
+
+def change_facing(current: str, direction: str, amount: int) -> str:
+    amount = amount // 90
+    directions = ["N", "E", "S", "W"]
+    current_idx = directions.index(current)
+    new_direction = ""
+    if direction == "L":
+        new_direction = directions[(current_idx - amount) % 4]
+    elif direction == "R":
+        new_direction = directions[(current_idx + amount) % 4]
+    return new_direction
+
+
 def part1(data):
-    pass
-
-
+    facing = "E"
+    traveled = {"N": 0, "E": 0, "S": 0, "W": 0}
+    for entry in data:
+        direction, amount = parse_sequence(entry)
+        if direction in ["N", "E", "S", "W"]:
+            traveled[direction] += amount
+        elif direction == "L" or direction == "R":
+            facing = change_facing(facing, direction, amount)
+        elif direction == "F":
+            traveled[facing] += amount
+    absolute_east_west = abs(traveled["E"] - traveled["W"])
+    absolute_north_south = abs(traveled["N"] - traveled["S"])
+    return absolute_east_west + absolute_north_south
 
 
 def part2(data):
     pass
 
-if __name__ == '__main__':
-    data = read_as_int_list('/home/dimitrios/dev/adventofcode2020/adventofcode2020/day12_input.txt')
+
+if __name__ == "__main__":
+    data = read_as_string_list(
+        "/home/dimitrios/dev/adventofcode2020/adventofcode2020/day12_input.txt"
+    )
     result1 = part1(data)
     p.pprint(result1)
-
 
     result2 = part2(data)
     p.pprint(result2)
