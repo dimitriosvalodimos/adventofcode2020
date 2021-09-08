@@ -89,20 +89,102 @@ from helper import *
 
 p = PrettyPrinter()
 
-def part1(data):
-    pass
+
+class Simulation:
+    def __init__(self, data: list[list[str]]) -> None:
+        self.current_data = data
+        self.next_data = data
+        self.num_rows = len(self.current_data)
+        self.num_cols = len(self.current_data[0])
+
+    def get_neighbours(self, pos: tuple[int, int]) -> int:
+        neighbours = 0
+        y, x = pos
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                n_y = y + i
+                n_x = x + j
+                # don't count yourself
+                if i == 0 and j == 0:
+                    continue
+                # don't cause an IndexOutOfBounds Error, trying to go off the left/top side
+                if n_y < 0 or n_x < 0:
+                    continue
+                # don't run off the right/bottom side
+                elif n_y >= self.num_rows or n_x >= self.num_cols:
+                    continue
+                else:
+                    if self.current_data[n_y][n_x] == "#":
+                        neighbours += 1
+        return neighbours
+
+    def single_pass(self) -> bool:
+        changed_seat = False
+        for row_index in range(self.num_rows):
+            for column_index in range(self.num_cols):
+                neighbours = self.get_neighbours((row_index, column_index))
+                if (
+                    self.current_data[row_index][column_index] == "L"
+                    and neighbours == 0
+                ):
+                    self.next_data[row_index][column_index] = "#"
+                    changed_seat = True
+                if (
+                    self.current_data[row_index][column_index] == "#"
+                    and neighbours >= 4
+                ):
+                    self.next_data[row_index][column_index] == "L"
+                    changed_seat = True
+        self.current_data = self.next_data
+        return changed_seat
+
+    def simulate_until_static(self) -> int:
+        occupied = 0
+        change_occured = self.single_pass()
+        while change_occured:
+            change_occured = self.single_pass()
+        for row in self.current_data:
+            for value in row:
+                if value == "#":
+                    occupied += 1
+        return occupied
 
 
+def further_split_data(data: list[str]) -> list[list[str]]:
+    new_data = [list(row) for row in data]
+    return new_data
+
+
+def part1(data: list[str]) -> int:
+    split_data = further_split_data(data)
+    sim = Simulation(split_data)
+    occupied = sim.simulate_until_static()
+    p.pprint(sim.current_data)
+    return occupied
 
 
 def part2(data):
     pass
 
-if __name__ == '__main__':
-    data = read_as_int_list('/home/dimitrios/dev/adventofcode2020/adventofcode2020/day11_input.txt')
+
+if __name__ == "__main__":
+    # data = read_as_string_list(
+    #     "/home/dimitrios/dev/adventofcode2020/adventofcode2020/day11_input.txt"
+    # )
+    data = [
+        "L.LL.LL.LL",
+        "LLLLLLL.LL",
+        "L.L.L..L..",
+        "LLLL.LL.LL",
+        "L.LL.LL.LL",
+        "L.LLLLL.LL",
+        "..L.L.....",
+        "LLLLLLLLLL",
+        "L.LLLLLL.L",
+        "L.LLLLL.LL",
+    ]
     result1 = part1(data)
     p.pprint(result1)
-
 
     result2 = part2(data)
     p.pprint(result2)
